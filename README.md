@@ -20,7 +20,7 @@ This is the description.
   
   #### 1.1.5. sample_hpfs
   
-  #### 1.1.6.
+  #### 1.1.6. hpf_density_histograms
   
 ## 2. Instructions
 ### 2.1. Python Instructions
