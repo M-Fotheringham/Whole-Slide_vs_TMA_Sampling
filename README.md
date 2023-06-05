@@ -3,7 +3,7 @@
 #### <div align="center">Contact: 16mrf6@queensu.ca</div>
   
   ## 1. Description
-This is the description. Included are snippets of Python (v3.8.2) code that were used in concert to process the data and construct some of the figures discussed in "Tissue Microarray vs. Whole-Slide Analysis of CD8 in Non-Small Cell Lung Carcinoma (Fotheringham et al., unpublished)".
+This is the description. Included are snippets of Python (v3.8.2) code that were used in concert to process the data and construct some of the figures discussed in "Tissue Microarray vs. Whole-Slide Analysis of CD8 in Non-Small Cell Lung Carcinoma" (Fotheringham et al., *unpublished*).
 
 
 ![WhaleFig](documents/WhaleSlide.png)
