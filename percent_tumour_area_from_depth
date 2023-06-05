@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+
+core_radius = 0.6 #This average was determined in HALO (mm)
+
+core_area = np.pi*core_radius**2
+
+#Import relevant columns from TMA Map, sort by coords
+TMA_MAP = pd.read_excel("/Users/michael/OneDrive - Queen's University/Team TMA vs Whole Slide/Data/CD8 IHC TMA1314/CD8IHC_RevisedCoreMap.xlsx", usecols="A:O").sort_values(["x", "y"]).reset_index()
+#Combine coords into one (x,y) column
+TMA_MAP["(Row, Column)"] = "(" + TMA_MAP["x"].astype(str) + "," + TMA_MAP["y"].astype(str) + ")"
+#Combine patient ID and block ID (irrelevant here but useful in other analyses)
+TMA_MAP["Block"] = TMA_MAP["PatientID"].astype(str) + "_" + TMA_MAP["BlockDesignation"]
+block_name_list = []
+for idx, name in enumerate(TMA_MAP["Block"]):
+    if len(name) < 4:
+        j = "0" + name
+    else:
+        j = name
+    block_name_list.append(j)
+
+TMA_MAP["Block"] = block_name_list
+del(block_name_list, idx, j, name)
+
+
+tumour_percentages = []
+low_T_cores = []
+high_T_cores = []
+inviable_cores = []
+
+for idx, tumour_depth in enumerate(TMA_MAP["Depth of Tumour- Core (mm)"]):
+    if TMA_MAP["Distance from Tumour to Inner-Edge of Core (mm)"][idx] >= 0:
+        percent_tumour_from_depth = 0
+    else:
+        percent_tumour_from_depth = (0.5*core_radius**2*(2*np.arccos((core_radius-tumour_depth)/core_radius) -
+                                                         np.sin(2*np.arccos((core_radius-tumour_depth)/core_radius))) / core_area) * 100
+    tumour_percentages.append(np.round(percent_tumour_from_depth, 2))
+    #print(f"idx: {idx}, Depth: {tumour_depth}, Percent: {percent_tumour_from_depth}")
+    if percent_tumour_from_depth <= 0:
+        low_T_cores.append(TMA_MAP["(Row, Column)"][idx])
+    if percent_tumour_from_depth > 80:
+        high_T_cores.append(TMA_MAP["(Row, Column)"][idx])
+
+inviable_cores = low_T_cores + high_T_cores
+
+#Add to df
+TMA_MAP["Estimated Tumour Percentages"] = tumour_percentages
+
+#Using 80% and 0%, range of 80% core (depth ~= 0.8955 mm) = -0.8955 to 0.3005 mm, range of 0% (depth = 0) = 0 to 1.2 mm
+
+del(idx, tumour_depth, percent_tumour_from_depth, tumour_percentages, core_radius, core_area)
