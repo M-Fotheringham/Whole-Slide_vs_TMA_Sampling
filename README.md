@@ -8,10 +8,19 @@ This is the description.
 ![WhaleFig](documents/WhaleSlide.png)
 
   ### 1.1. Functions
-  #### 1.1.1. n_core_sampler
+  #### 1.1.1. load_sim_data
+  
+  #### 1.1.2. n_core_sampler
 
 ![WhaleFig](documents/SimulatedSampling.png)
   
+  #### 1.1.3. eta_counter
+  
+  #### 1.1.4. 
+  
+  #### 1.1.5.
+  
+  #### 1.1.6.
   
 ## 2. Instructions
 ### 2.1. Python Instructions
