@@ -16,9 +16,9 @@ This is the description.
   
   #### 1.1.3. eta_counter
   
-  #### 1.1.4. 
+  #### 1.1.4. compute_hpfs
   
-  #### 1.1.5.
+  #### 1.1.5. sample_hpfs
   
   #### 1.1.6.
   
