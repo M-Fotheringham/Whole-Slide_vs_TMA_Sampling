@@ -6,8 +6,14 @@
 This is the description.
 
 ![WhaleFig](documents/WhaleSlide.png)
+
+  ### 1.1. Functions
+  #### 1.1.1. n_core_sampler
+
+![WhaleFig](documents/SimulatedSampling.png)
   
-## 2.2. Instructions
-### 2.2.1. Python Instructions
-#### 2.2.1.1. Environment setup
+  
+## 2. Instructions
+### 2.1. Python Instructions
+#### 2.1.1. Environment setup
 These are the instructions.
