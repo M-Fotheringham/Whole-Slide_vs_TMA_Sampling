@@ -5,6 +5,7 @@
   ## 1. Description
 This is the description.
 
+![Figure1](main/documents/WhaleSlide.PNG)
   
 ## 2.2. Instructions
 ### 2.2.1. Python Instructions
