@@ -10,34 +10,52 @@ This is the description. Included are snippets of Python (v3.8.2) code that were
 
   ### 1.1. Functions
   #### 1.1.1. load_sim_data
-Tissue annotations (in .annotations format, essentially an xml of listed vertices) and cell object data (in the format of minimum and maximum x, y bounds) were exported from HALO. Annotations were digested and reassembled using Shapely (Polygon, MultiPolygon). CD8<sup>+</sup> cells were filtered and their centre points were calculated from the average of their bounds. This function returns the coordinate data for CD8<sup>+</sup> cells (object_data) and the processed annotations (plot_annotations).
+Tissue annotations (in .annotations format, essentially an xml of listed vertices) and cell object data (in the format of minimum and maximum x, y bounds) were exported from HALO. Annotations were digested and reassembled using Shapely (Polygon, MultiPolygon). CD8<sup>+</sup> cells were filtered and their centre points were calculated from the average of their bounds.
   
- **Block**: This is the unique tissue block identifier;
+    Input:
   
- **parent_filepath**: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named *block*.
+ *Block*: This is the unique tissue block identifier;
+  
+ *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named *block*.
+  
+    Returns:
+  
+  *object_data*: dataframe of the coordinate data for CD8<sup>+</sup> cells;
+  
+  *plot_annotations*: Shapely Polygons representing the imported tissue regions.
   
   #### 1.1.2. n_core_sampler
- The reformatted annotations and cell object data are fed into n_core_sampler to simulate random TMA sampling of each tissue region. 
+ The reformatted annotations and cell object data are fed into n_core_sampler to simulate random TMA sampling of each tissue region. Coordinates within the range of the tissue bounds are randomly generated until a point is within the tissue polygon and the area of the simulated core generated from extending *circle_radius* from that coordinate point matches the tissue-specific criteria:
+ Tumour cores must contain at least 50% tumour by area.
+ IM cores must contain 80% => tumour => 10% and stroma => 10%.
   
- **Block**: This is the unique tissue block identifier;
+    Input:
   
-  **object_data**: CD8<sup>+</sup> cell coordinates derived from *load_sim_data*;
+ *Block*: This is the unique tissue block identifier;
   
- **plot_annnotations**: Shapely polygons derived from *load_sim_data*;
+  *object_data*: CD8<sup>+</sup> cell coordinates derived from *load_sim_data*;
   
- **number_of_tumour_regions**:
+ *plot_annnotations*: Shapely polygons derived from *load_sim_data*;
   
-  **circle_radius**:
+ *number_of_tumour_regions*:
   
-  **boundary_type**:
+  *circle_radius*:
   
-  **n_cores**:
+  *boundary_type*:
   
-  **microns_per_pixel**: Always 0.22715 µm/px.
+  *n_cores*:
+  
+  *microns_per_pixel*: Always 0.22715 µm/px.
  
+    Returns:
  
+  *sampling_results*: A dictionary containing the mean CD8<sup>+</sup> cell density, stdev, std error, tissue region, block, core radius, number of cores attempted, number of cores actually sampled, the mean CD8<sup>+</sup> cell count, and mean tissue area per sampling iteration.
+  
+  
   
 ![WhaleFig](documents/SimulatedSampling.png)
+*A given sampling iteration using n_cores=10 of circle_radius=0.6 in the invasive margin (IM) and central tumour (CT) visualized with Matplotlib (external code).*
+  
   
   #### 1.1.3. eta_counter
 Ain't nobody got time for that.
