@@ -1,3 +1,5 @@
+### | These functions are used to digitally manipulate the WS and simulate TMA core sampling, and display the resulting data. |###
+#     Last Updated: June 1, 2023 by Michael Fotheringham  
 def compute_hpfs(block, object_data, plot_annotations, number_of_tumour_regions, boundary_type, hpf_dimension_microns, microns_per_pixel=0.22715):
     # Convert the cell coordinates to a GeoDataFrame
     geometry = [Point(x, y) for x, y in object_data["Cell Centre"]]
