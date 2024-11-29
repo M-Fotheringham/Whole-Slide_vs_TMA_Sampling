@@ -1,13 +1,17 @@
-###
+import os
+import pandas as pd
 
-def load_sim_data(block, parent_filepath):
+def load_data(block, parent_filepath):
     # Ensure proper formatting
-    parent_filepath = os.path.join(parent_filepath, block).replace("\\", "/") 
-    if not os.path.exists(os.path.join(parent_filepath, "Object_Data.csv").replace("\\", "/")):
-        raise FileNotFoundError(os.path.join(parent_filepath, 'Object_Data.csv').replace("\\", "/") + " doesn't exist.")
+    filepath = os.path.join(parent_filepath, block).replace("\\", "/")
+
     # Load object data
-    object_data = pd.read_csv(os.path.join(parent_filepath, 'Object_Data.csv').replace("\\", "/"))
-    object_data = object_data[['Analysis Region', 'Algorithm Name', 'Object Id', 'XMin', 'XMax', 'YMin', 'YMax', 'CD8']]
+    object_path = os.path.join(filepath, "Object_Data.csv").replace("\\", "/")
+    if not os.path.exists(object_path):
+        raise FileNotFoundError(f"{object_path} doesn't exist.")
+    
+    object_data = pd.read_csv(object_path)
+    object_data = object_data[["Analysis Region", "Algorithm Name", "Object Id", "XMin", "XMax", "YMin", "YMax", "CD8"]]
     object_data = object_data[(object_data["Analysis Region"] == "Partition Zone") & (object_data["CD8"] == 1)]
     cell_coords = []
     for idx, row in object_data.iterrows():
