@@ -6,7 +6,6 @@ import geopandas as gpd
 def compute_hpfs(
         sampleid,
         cells,
-        layer,
         annos,
         width_microns,
         microns_per_pixel=0.22715
@@ -18,9 +17,9 @@ def compute_hpfs(
     # Establish constants
     width_pixels = width_microns / microns_per_pixel
     mm2_per_pixels2 = (microns_per_pixel / 1000) ** 2
-    partition = annos[annos["layer"] == layer]["geometry"]
-    tumour = annos[annos["layer"] == "net_tumour"]["geometry"]
-    im = annos[annos["layer"] == "net_IM"]["geometry"]
+    partition = annos[annos["layer"] == "partition"]["geometry"].iloc[0]
+    tumour = annos[annos["layer"] == "tumour"]["geometry"].iloc[0]
+    im = annos[annos["layer"] == "IM"]["geometry"].iloc[0]
 
     # Generate HPFs from annotation bounds
     min_x, min_y, max_x, max_y = partition.bounds
@@ -40,19 +39,19 @@ def compute_hpfs(
             hpf_inter = poly_hpf.intersection(partition)
             hpf_area = hpf_inter.area * mm2_per_pixels2
 
-            if hpf_area / poly_hpf.area >= 0.5:
+            if hpf_area / (poly_hpf.area * mm2_per_pixels2) >= 0.5:
                 # Compute cell count
                 intersecting_cells = cells[cells.intersects(hpf_inter)]
                 cell_count = len(intersecting_cells)
                 cell_den = cell_count / hpf_area
 
                 # Estimate HPF region from layer area
-                tum_frac = poly_hpf.intersection(tumour).area / hpf_area
-                im_frac = poly_hpf.intersection(im).area / hpf_area
+                tum_frac = poly_hpf.intersection(tumour).area
+                im_frac = poly_hpf.intersection(im).area
                 if tum_frac > im_frac:
                     region = "tumour"
                 else:
-                    region = "im"
+                    region = "IM"
 
                 # Store HPFs >= 50% area
                 computed_hpfs.append(

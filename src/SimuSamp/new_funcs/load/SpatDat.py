@@ -2,8 +2,8 @@
 Loads data exported from HALO into Shapely objects
 """
 
-from load_data import load_data
-from ..compute.compute_hpfs import compute_hpfs
+from SimuSamp.src.SimuSamp.new_funcs.load.load_data import load_data
+from SimuSamp.src.SimuSamp.new_funcs.compute.compute_hpfs import compute_hpfs
 
 
 class SpatDat:
@@ -22,7 +22,6 @@ class SpatDat:
 
         hpfs = compute_hpfs(self.sampleid,
                             self.object_data,
-                            "partition",
                             self.annotation_data,
                             width_microns)
 
