@@ -5,6 +5,7 @@ Loads data exported from HALO into Shapely objects
 from SimuSamp.new_funcs.load.load_data import load_data
 from SimuSamp.new_funcs.compute.compute_hpfs import compute_hpfs
 from SimuSamp.new_funcs.load.subset_cells import subset
+from SimuSamp.new_funcs.load.subset_annotations import subset_anno
 
 
 class SpatDat:
@@ -24,6 +25,12 @@ class SpatDat:
         cells = subset(self.object_data, self.annotation_data, annotation)
 
         return cells
+
+    def subset_annotation(self, annotation):
+
+        anno = subset_anno(self.annotation_data, annotation)
+
+        return anno
     
     def compute_fields(self, width_microns):
 
