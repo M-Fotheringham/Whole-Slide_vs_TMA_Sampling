@@ -1,5 +1,6 @@
 import numpy as np
 from shapely import Point, STRtree
+from SimuSamp.new_funcs.compute.hopkins_stat import hopkins_stat
 
 
 def sample_n_cores(
@@ -12,6 +13,7 @@ def sample_n_cores(
         n_cores=3,
         outer_im_anno=None,
         extended_partition=None,
+        hopkins=False,
         microns_per_pixel=0.22715):
     """
     Args:
@@ -98,6 +100,10 @@ def sample_n_cores(
                     cell_counts.append(cell_count)
                     core_areas.append(core_area)
                     cell_densities.append(cell_density)
+
+                    if hopkins:
+                        # Calculate Hopkins statistic for each core
+                        h_stat = hopkins_stat(intersecting_cells, 100)
                     break
 
                 else:
