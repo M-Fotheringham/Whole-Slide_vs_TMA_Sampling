@@ -1,6 +1,7 @@
 import numpy as np
 from shapely import Point, STRtree
 from SimuSamp.new_funcs.compute.hopkins_stat import hopkins_stat
+from SimuSamp.new_funcs.compute.n_neighbours import neighbours
 
 
 def sample_n_cores(
@@ -13,11 +14,21 @@ def sample_n_cores(
         n_cores=3,
         outer_im_anno=None,
         extended_partition=None,
-        hopkins=False,
+        n_neighbours=False,
         microns_per_pixel=0.22715):
     """
     Args:
-
+        sampleid (str): The sample ID.
+        cell_data (geopandas.GeoDataFrame): The cell data.
+        primary_anno (shapely.geometry.Polygon): The primary annotation.
+        secondary_anno (shapely.geometry.Polygon): The secondary annotation.
+        region (str): The region to sample from.
+        core_radius (float): The core radius in microns.
+        n_cores (int): The number of cores to sample.
+        outer_im_anno (shapely.geometry.Polygon): The outer IM annotation.
+        extended_partition (shapely.geometry.Polygon): The extended partition.
+        n_neighbours (bool): Whether to compute the nearest neighbour distance.
+        microns_per_pixel (float): The microns per pixel.
     """
 
     # Establish constants
@@ -34,6 +45,8 @@ def sample_n_cores(
     cell_densities = []
     n_den_stdev = []
     n_den_sterr = []
+    nearest_neighbour = []
+    hopkins_statistic = []
 
     # Ensure sufficient tissue for sampling
     if primary_anno.area > n_cores * core_max_area:
@@ -101,9 +114,13 @@ def sample_n_cores(
                     core_areas.append(core_area)
                     cell_densities.append(cell_density)
 
-                    if hopkins:
+                    if n_neighbours:
                         # Calculate Hopkins statistic for each core
-                        h_stat = hopkins_stat(intersecting_cells, 100)
+                        h_stat = hopkins_stat(intersecting_cells, 0.05)
+                        hopkins_statistic.append(h_stat)
+                        # Calculate mean nearest neighbour distance
+                        nn = np.nanmean(neighbours(intersecting_cells, 1))
+                        nearest_neighbour.append(nn)
                     break
 
                 else:
@@ -118,6 +135,8 @@ def sample_n_cores(
         core_areas_n_mean = np.nan
         n_den_stdev.append(np.nan)
         n_den_sterr.append(np.nan)
+        hopkins_mean = np.nan
+        nn_mean = np.nan
     else:
         cell_density_n_mean = np.nanmean(cell_densities)
         cell_counts_n_mean = np.nanmean(cell_counts)
@@ -125,6 +144,8 @@ def sample_n_cores(
         den_stdev = np.nanstd(cell_densities)
         n_den_stdev.append(den_stdev)
         n_den_sterr.append(den_stdev / np.sqrt(len(cell_densities)))
+        hopkins_mean = np.nanmean(hopkins_statistic)
+        nn_mean = np.nanmean(nearest_neighbour)
 
     # Store results in dict to grow in iterative loop outside of function
     sampling_results = {
@@ -137,7 +158,10 @@ def sample_n_cores(
         "n_cores": n_cores,
         "Cores_actually_sampled": cores_sampled,
         "Counts_n_mean": cell_counts_n_mean,
-        "Areas_n_mean": core_areas_n_mean}
+        "Areas_n_mean": core_areas_n_mean,
+        "Nearest_neighbour_mean": nn_mean,
+        "Hopkins_mean": hopkins_mean
+        }
 
     if cores_sampled > 0:
         sampling_results["Density_top_core"] = max(cell_densities)
