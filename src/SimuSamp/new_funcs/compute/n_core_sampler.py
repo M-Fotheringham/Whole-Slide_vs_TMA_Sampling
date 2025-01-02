@@ -119,7 +119,9 @@ def sample_n_cores(
                         h_stat = hopkins_stat(intersecting_cells, 0.05)
                         hopkins_statistic.append(h_stat)
                         # Calculate mean nearest neighbour distance
-                        nn = np.nanmean(neighbours(intersecting_cells, 1))
+                        nn = neighbours(intersecting_cells, 1)
+                        if nn is not np.nan:
+                            nn = np.nanmean(nn)
                         nearest_neighbour.append(nn)
                     break
 
