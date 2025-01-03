@@ -2,7 +2,7 @@ import numpy as np
 from SimuSamp.new_funcs.compute.n_neighbours import neighbours
 
 
-def hopkins_stat(gdf, k, prop_k=True):
+def hopkins_stat(gdf, k=0.1, prop_k=True):
     """
     Compute the Hopkins statistic for the input GeoDataFrame.
     The Hopkins statistic is a measure of the spatial clustering of a dataset.
@@ -13,13 +13,13 @@ def hopkins_stat(gdf, k, prop_k=True):
     4. Compute the ratio of the sum of the distances.
     Args:
         gdf (geopandas.GeoDataFrame): The input GeoDataFrame.
-        k (int): The number of random points to select.
+        k (int): The number of random points to select (min 5).
     Returns:
         float: The Hopkins statistic.
     """
     gdf = gdf.reset_index(drop=True)
 
-    if len(gdf) < 5:
+    if len(gdf) <= 5:
         return np.nan
 
     # Compute the nearest neighbour distances for the input GeoDataFrame
@@ -27,8 +27,9 @@ def hopkins_stat(gdf, k, prop_k=True):
 
     if prop_k:
         k = int(len(gdf) * k)
-        if k < 5:
-            k = 5
+
+    if k < 5:
+        k = 5
 
     # Randomly select k points from the dataset
     random_indices = np.random.choice(len(gdf), k, replace=False)

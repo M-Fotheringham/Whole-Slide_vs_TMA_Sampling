@@ -23,7 +23,7 @@ def sample_n_cores(
         primary_anno (shapely.geometry.Polygon): The primary annotation.
         secondary_anno (shapely.geometry.Polygon): The secondary annotation.
         region (str): The region to sample from.
-        core_radius (float): The core radius in microns.
+        core_radius (float): The core radius in mm.
         n_cores (int): The number of cores to sample.
         outer_im_anno (shapely.geometry.Polygon): The outer IM annotation.
         extended_partition (shapely.geometry.Polygon): The extended partition.
@@ -43,8 +43,6 @@ def sample_n_cores(
     cell_counts = []
     core_areas = []
     cell_densities = []
-    n_den_stdev = []
-    n_den_sterr = []
     nearest_neighbour = []
     hopkins_statistic = []
 
@@ -64,7 +62,7 @@ def sample_n_cores(
                 centre = Point(x, y)
 
                 # Ensure that there are no overlapping cores
-                overlapping = False
+                # overlapping = False
                 # for prev_point in points:
                 #     if prev_point.distance(centre) < diameter:
                 #         overlapping = True
@@ -75,7 +73,7 @@ def sample_n_cores(
                     continue
         # ====================================================================
 
-                if not overlapping and primary_anno.contains(centre):
+                if primary_anno.contains(centre):
                     core = centre.buffer(radius)
                     intersection = core.intersection(primary_anno)
                     proportion = intersection.area / core_max_area
@@ -116,13 +114,14 @@ def sample_n_cores(
 
                     if n_neighbours:
                         # Calculate Hopkins statistic for each core
-                        h_stat = hopkins_stat(intersecting_cells, 0.05)
+                        h_stat = hopkins_stat(intersecting_cells)
                         hopkins_statistic.append(h_stat)
                         # Calculate mean nearest neighbour distance
                         nn = neighbours(intersecting_cells, 1)
                         if nn is not np.nan:
                             nn = np.nanmean(nn)
                         nearest_neighbour.append(nn)
+
                     break
 
                 else:
@@ -135,25 +134,36 @@ def sample_n_cores(
         cell_density_n_mean = np.nan
         cell_counts_n_mean = np.nan
         core_areas_n_mean = np.nan
-        n_den_stdev.append(np.nan)
-        n_den_sterr.append(np.nan)
+        den_stdev = np.nan
+        den_sterr = np.nan
         hopkins_mean = np.nan
+        hopkins_statistic_stdev = np.nan
         nn_mean = np.nan
+        nearest_neighbour_stdev = np.nan
     else:
         cell_density_n_mean = np.nanmean(cell_densities)
         cell_counts_n_mean = np.nanmean(cell_counts)
         core_areas_n_mean = np.nanmean(core_areas)
         den_stdev = np.nanstd(cell_densities)
-        n_den_stdev.append(den_stdev)
-        n_den_sterr.append(den_stdev / np.sqrt(len(cell_densities)))
-        hopkins_mean = np.nanmean(hopkins_statistic)
-        nn_mean = np.nanmean(nearest_neighbour)
+        den_sterr = den_stdev / np.sqrt(len(cell_densities))
+        if all(np.isnan(nearest_neighbour)):
+            nn_mean = np.nan
+            nearest_neighbour_stdev = np.nan
+        else:
+            nn_mean = np.nanmean(nearest_neighbour)
+            nearest_neighbour_stdev = np.nanstd(nearest_neighbour)
+        if all(np.isnan(hopkins_statistic)):
+            hopkins_mean = np.nan
+            hopkins_statistic_stdev = np.nan
+        else:
+            hopkins_mean = np.nanmean(hopkins_statistic)
+            hopkins_statistic_stdev = np.nanstd(hopkins_statistic)
 
     # Store results in dict to grow in iterative loop outside of function
     sampling_results = {
         "Density_n_mean": cell_density_n_mean,
-        "Den_stdev": n_den_stdev[0],
-        "Den_sterr": n_den_sterr[0],
+        "Den_stdev": den_stdev,
+        "Den_sterr": den_sterr,
         "Region": region,
         "Sampleid": sampleid,
         "Radius": radius * microns_per_pixel,
@@ -162,7 +172,9 @@ def sample_n_cores(
         "Counts_n_mean": cell_counts_n_mean,
         "Areas_n_mean": core_areas_n_mean,
         "Nearest_neighbour_mean": nn_mean,
-        "Hopkins_mean": hopkins_mean
+        "Nearest_neighbour_stdev": nearest_neighbour_stdev,
+        "Hopkins_mean": hopkins_mean,
+        "Hopkins_stdev": hopkins_statistic_stdev
         }
 
     if cores_sampled > 0:
