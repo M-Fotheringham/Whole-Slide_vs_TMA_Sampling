@@ -1,5 +1,5 @@
 import numpy as np
-from shapely import Point, STRtree
+from shapely import Point, STRtree, MultiPolygon
 from SimuSamp.new_funcs.compute.hopkins_stat import hopkins_stat
 from SimuSamp.new_funcs.compute.n_neighbours import neighbours
 
@@ -15,7 +15,8 @@ def sample_n_cores(
         outer_im_anno=None,
         extended_partition=None,
         n_neighbours=False,
-        microns_per_pixel=0.22715):
+        microns_per_pixel=0.22715,
+        plot=False):
     """
     Args:
         sampleid (str): The sample ID.
@@ -45,6 +46,7 @@ def sample_n_cores(
     cell_densities = []
     nearest_neighbour = []
     hopkins_statistic = []
+    cores = []
 
     # Ensure sufficient tissue for sampling
     if primary_anno.area > n_cores * core_max_area:
@@ -75,13 +77,15 @@ def sample_n_cores(
 
                 if primary_anno.contains(centre):
                     core = centre.buffer(radius)
-                    intersection = core.intersection(primary_anno)
-                    proportion = intersection.area / core_max_area
                     if region == "tumour":
+                        intersection = core.intersection(primary_anno)
+                        proportion = intersection.area / core_max_area
                         # Ensure core is at least 50% tumour
                         if proportion >= 0.5:
                             points.append(centre)
                             points_tree = STRtree(points)
+                            if plot:
+                                cores.append(core)
                         else:
                             attempt_n += 1
                             continue
@@ -97,6 +101,8 @@ def sample_n_cores(
                         if tum_prop_filt & strom_prop_filt:
                             points.append(centre)
                             points_tree = STRtree(points)
+                            if plot:
+                                cores.append(core)
                         else:
                             attempt_n += 1
                             continue
@@ -180,5 +186,8 @@ def sample_n_cores(
     if cores_sampled > 0:
         sampling_results["Density_top_core"] = max(cell_densities)
         sampling_results["Density_bottom_core"] = min(cell_densities)
+
+    if plot:
+        sampling_results["Cores"] = MultiPolygon(cores)
 
     return sampling_results
