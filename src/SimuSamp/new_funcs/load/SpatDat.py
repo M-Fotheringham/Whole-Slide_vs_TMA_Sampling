@@ -22,6 +22,8 @@ class SpatDat:
             self.filepath, self.cell_name
         )
 
+        self.poisson_cells = {}
+
     def subset_cells(self, annotation):
 
         cells = subset(self.object_data, self.annotation_data, annotation)
@@ -33,6 +35,8 @@ class SpatDat:
         random_cells = poisson_cells(
             self.object_data, self.annotation_data, annotation, n_cells
         )
+
+        self.poisson_cells[annotation] = random_cells
 
         return random_cells
 
