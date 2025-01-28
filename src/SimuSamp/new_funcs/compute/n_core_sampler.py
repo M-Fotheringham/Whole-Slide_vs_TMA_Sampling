@@ -1,193 +1,165 @@
 import numpy as np
-from shapely import Point, STRtree, MultiPolygon
+import pandas as pd
+from shapely.geometry import MultiPolygon
+import geopandas as gpd
 from SimuSamp.new_funcs.compute.hopkins_stat import hopkins_stat
 from SimuSamp.new_funcs.compute.n_neighbours import neighbours
+from SimuSamp.new_funcs.compute.core_sample import core_sample
 
 
 def sample_n_cores(
-        sampleid,
-        cell_data,
-        primary_anno,
-        secondary_anno=None,
-        region="tumour",
-        core_radius=0.5,
-        n_cores=3,
-        outer_im_anno=None,
-        extended_partition=None,
-        n_neighbours=False,
-        microns_per_pixel=0.22715,
-        plot=False):
+    spatdat,
+    region="tumour",
+    core_radius=0.5,
+    n_core_list=None,
+    iterations=100,
+    microns_per_pixel=0.22715,
+):
     """
     Args:
-        sampleid (str): The sample ID.
-        cell_data (geopandas.GeoDataFrame): The cell data.
-        primary_anno (shapely.geometry.Polygon): The primary annotation.
-        secondary_anno (shapely.geometry.Polygon): The secondary annotation.
-        region (str): The region to sample from.
-        core_radius (float): The core radius in mm.
-        n_cores (int): The number of cores to sample.
-        outer_im_anno (shapely.geometry.Polygon): The outer IM annotation.
-        extended_partition (shapely.geometry.Polygon): The extended partition.
-        n_neighbours (bool): Whether to compute the nearest neighbour distance.
-        microns_per_pixel (float): The microns per pixel.
     """
 
-    # Establish constants
+    # Establish constants =====================================================
     radius = core_radius * 1000 / microns_per_pixel
-    diameter = radius * 2
     mm2_per_pixels2 = (microns_per_pixel / 1000) ** 2
-    core_max_area = np.pi * radius ** 2
 
-    # Collect core density information
-    points = []
-    points_tree = STRtree(points)
-    cell_counts = []
-    core_areas = []
-    cell_densities = []
-    nearest_neighbour = []
-    hopkins_statistic = []
-    cores = []
+    if n_core_list is None:
+        n_core_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-    # Ensure sufficient tissue for sampling
-    if primary_anno.area > n_cores * core_max_area:
+    cells = spatdat.subset_cells("extended_partition")
+    ext_partition = spatdat.subset_annotation("extended_partition")
+    tum = spatdat.subset_annotation("tumour")
+    outer_im = spatdat.subset_annotation("outer_IM")
+    # =========================================================================
 
-        # Iteratively sample points from annotation bounds and extend radius
-        # This can be further optimized ======================================
-        min_x, min_y, max_x, max_y = primary_anno.bounds
-        for n in range(n_cores):
+    # Generate random points within the region ================================
+    random_points = spatdat.poisson_distribution(region)
 
-            attempt_n = 0
-            while attempt_n < 200:
+    # Loop through conditions:
 
-                x = np.random.uniform(min_x, max_x)
-                y = np.random.uniform(min_y, max_y)
-                centre = Point(x, y)
+    den_mean = []
+    den_stdev = []
+    den_sterr = []
+    region_list = []
+    sampleid_list = []
+    radius_list = []
+    n_cores_list = []
+    n_sampled_list = []
+    iteration_list = []
+    counts_n_mean = []
+    areas_n_mean = []
+    rand_counts_n_mean = []
+    nearest_neighbour_n_mean = []
+    nearest_neighbour_n_stdev = []
+    hopkins_statistic_n_mean = []
+    hopkins_statistic_n_stdev = []
+    cores_list = []
 
-                # Ensure that there are no overlapping cores
-                # overlapping = False
-                # for prev_point in points:
-                #     if prev_point.distance(centre) < diameter:
-                #         overlapping = True
-                #         attempt_n += 1
-                #         continue
-                if any(points_tree.query(centre.buffer(diameter))):
-                    attempt_n += 1
-                    continue
-        # ====================================================================
+    for n_cores in n_core_list:
+        for i in range(iterations):
 
-                if primary_anno.contains(centre):
-                    core = centre.buffer(radius)
-                    if region == "tumour":
-                        intersection = core.intersection(primary_anno)
-                        proportion = intersection.area / core_max_area
-                        # Ensure core is at least 50% tumour
-                        if proportion >= 0.5:
-                            points.append(centre)
-                            points_tree = STRtree(points)
-                            if plot:
-                                cores.append(core)
-                        else:
-                            attempt_n += 1
-                            continue
-                    if region == "IM":
-                        # Calculate tumour and stroma proportions
-                        tum_inter = core.intersection(secondary_anno)
-                        tum_prop = tum_inter.area / core_max_area
-                        im_inter = core.intersection(outer_im_anno)
-                        im_prop = im_inter.area / core_max_area
-                        # Ensure 80% >= tumour >= 10%, and 10% >= stroma
-                        tum_prop_filt = (tum_prop >= 0.10) & (tum_prop <= 0.8)
-                        strom_prop_filt = im_prop >= 0.10
-                        if tum_prop_filt & strom_prop_filt:
-                            points.append(centre)
-                            points_tree = STRtree(points)
-                            if plot:
-                                cores.append(core)
-                        else:
-                            attempt_n += 1
-                            continue
+            filtered_points = core_sample(
+                random_points, radius, region, tum, outer_im
+            )
 
-                    # Count cells in each core
-                    core = core.intersection(extended_partition)
-                    intersecting_cells = cell_data[cell_data.intersects(core)]
-                    cell_count = len(intersecting_cells)
-                    core_area = core.area * mm2_per_pixels2
-                    cell_density = cell_count / core_area
-                    # Collect for each core
-                    cell_counts.append(cell_count)
-                    core_areas.append(core_area)
-                    cell_densities.append(cell_density)
+            # Calculate density, spatial metrics per core =====================
+            filtered_cores = filtered_points.buffer(radius)
 
-                    if n_neighbours:
-                        # Calculate Hopkins statistic for each core
-                        h_stat = hopkins_stat(intersecting_cells)
-                        hopkins_statistic.append(h_stat)
-                        # Calculate mean nearest neighbour distance
-                        nn = neighbours(intersecting_cells, 1)
-                        if nn is not np.nan:
-                            nn = np.nanmean(nn)
-                        nearest_neighbour.append(nn)
+            # Subsample n_cores
+            n_samples = min([n_cores, len(filtered_cores)])
 
-                    break
+            sampled_gdf = filtered_cores.sample(n_samples)
 
-                else:
-                    attempt_n += 1
-                    continue
+            # Compile core metrics
+            core_counts = []
+            core_areas = []
+            core_densities = []
+            rand_counts = []
+            nearest_neighbour = []
+            hopkins_statistic = []
 
-    # Compute averages, stdev, and sterror
-    cores_sampled = len(points)
-    if cores_sampled == 0:
-        cell_density_n_mean = np.nan
-        cell_counts_n_mean = np.nan
-        core_areas_n_mean = np.nan
-        den_stdev = np.nan
-        den_sterr = np.nan
-        hopkins_mean = np.nan
-        hopkins_statistic_stdev = np.nan
-        nn_mean = np.nan
-        nearest_neighbour_stdev = np.nan
-    else:
-        cell_density_n_mean = np.nanmean(cell_densities)
-        cell_counts_n_mean = np.nanmean(cell_counts)
-        core_areas_n_mean = np.nanmean(core_areas)
-        den_stdev = np.nanstd(cell_densities)
-        den_sterr = den_stdev / np.sqrt(len(cell_densities))
-        if all(np.isnan(nearest_neighbour)):
-            nn_mean = np.nan
-            nearest_neighbour_stdev = np.nan
-        else:
-            nn_mean = np.nanmean(nearest_neighbour)
-            nearest_neighbour_stdev = np.nanstd(nearest_neighbour)
-        if all(np.isnan(hopkins_statistic)):
-            hopkins_mean = np.nan
-            hopkins_statistic_stdev = np.nan
-        else:
-            hopkins_mean = np.nanmean(hopkins_statistic)
-            hopkins_statistic_stdev = np.nanstd(hopkins_statistic)
+            for idx, geom in enumerate(sampled_gdf):
+                core = geom.intersection(ext_partition)
+                core_area = core.area * mm2_per_pixels2
 
-    # Store results in dict to grow in iterative loop outside of function
-    sampling_results = {
-        "Density_n_mean": cell_density_n_mean,
-        "Den_stdev": den_stdev,
-        "Den_sterr": den_sterr,
-        "Region": region,
-        "Sampleid": sampleid,
-        "Radius": radius * microns_per_pixel,
-        "n_cores": n_cores,
-        "Cores_actually_sampled": cores_sampled,
-        "Counts_n_mean": cell_counts_n_mean,
-        "Areas_n_mean": core_areas_n_mean,
-        "Nearest_neighbour_mean": nn_mean,
-        "Nearest_neighbour_stdev": nearest_neighbour_stdev,
-        "Hopkins_mean": hopkins_mean,
-        "Hopkins_stdev": hopkins_statistic_stdev
+                # gdf because sjoin is faster than overlay
+                core_df = gpd.GeoDataFrame(geometry=[core])
+
+                core_cells = gpd.sjoin(cells, core_df, predicate="within")
+                core_random_points = gpd.sjoin(
+                    filtered_points, core_df, predicate="within"
+                )
+
+                cell_count = len(core_cells)
+                core_counts.append(cell_count)
+
+                core_density = cell_count / core_area
+                core_areas.append(core_area)
+                core_densities.append(core_density)
+
+                rand_count = len(core_random_points)
+                rand_counts.append(rand_count)
+
+                core_nearest_neighbour = neighbours(core_cells, 1)
+                if core_nearest_neighbour is not np.nan:
+                    core_nearest_neighbour = np.nanmean(core_nearest_neighbour)
+                nearest_neighbour.append(core_nearest_neighbour)
+
+                core_hopkins_statistic = hopkins_stat(core, core_cells)
+                hopkins_statistic.append(core_hopkins_statistic)
+
+            den_mean.append(np.nanmean(core_densities))
+            if n_cores > 1:
+                den_stdev.append(np.nanstd(core_densities))
+                den_sterr.append(
+                    np.nanstd(core_densities) / np.sqrt(len(core_densities))
+                )
+            else:
+                den_stdev.append(np.nan)
+                den_sterr.append(np.nan)
+            region_list.append(region)
+            sampleid_list.append(spatdat.sampleid)
+            radius_list.append(core_radius)
+            n_cores_list.append(n_cores)
+            n_sampled_list.append(n_samples)
+            iteration_list.append(i + 1)
+            counts_n_mean.append(np.nanmean(core_counts))
+            areas_n_mean.append(np.nanmean(core_areas))
+            rand_counts_n_mean.append(np.nanmean(rand_counts))
+            if np.nansum(core_counts) > 1:
+                nearest_neighbour_n_mean.append(np.nanmean(nearest_neighbour))
+                nearest_neighbour_n_stdev.append(np.nanstd(nearest_neighbour))
+            else:
+                nearest_neighbour_n_mean.append(np.nan)
+                nearest_neighbour_n_stdev.append(np.nan)
+            if np.nansum(core_counts) > 5:
+                hopkins_statistic_n_mean.append(np.nanmean(hopkins_statistic))
+                hopkins_statistic_n_stdev.append(np.nanstd(hopkins_statistic))
+            else:
+                hopkins_statistic_n_mean.append(np.nan)
+                hopkins_statistic_n_stdev.append(np.nan)
+            cores_list.append(MultiPolygon([x for x in sampled_gdf]))
+
+    results_df = pd.DataFrame(
+        {
+            "density_mean": den_mean,
+            "density_stdev": den_stdev,
+            "density_sterr": den_sterr,
+            "region": region_list,
+            "sampleid": sampleid_list,
+            "core_radius": radius_list,
+            "n_cores": n_cores_list,
+            "n_sampled": n_sampled_list,
+            "iteration": iteration_list,
+            "cell_counts_mean": counts_n_mean,
+            "areas_mean": areas_n_mean,
+            "random_counts_mean": rand_counts_n_mean,
+            "nearest_neighbour_mean": nearest_neighbour_n_mean,
+            "nearest_neighbour_stdev": nearest_neighbour_n_stdev,
+            "hopkins_statistic_mean": hopkins_statistic_n_mean,
+            "hopkins_statistic_stdev": hopkins_statistic_n_stdev,
+            "cores": cores_list,
         }
+    )
 
-    if cores_sampled > 0:
-        sampling_results["Density_top_core"] = max(cell_densities)
-        sampling_results["Density_bottom_core"] = min(cell_densities)
-
-    if plot:
-        sampling_results["Cores"] = MultiPolygon(cores)
-
-    return sampling_results
+    return results_df

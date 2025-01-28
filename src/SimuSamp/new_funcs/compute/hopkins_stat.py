@@ -1,8 +1,11 @@
 import numpy as np
+import pointpats
+from shapely.geometry import Point
+import geopandas as gpd
 from SimuSamp.new_funcs.compute.n_neighbours import neighbours
 
 
-def hopkins_stat(gdf, k=0.1, prop_k=True):
+def hopkins_stat(anno, gdf, k=0.1, prop_k=True):
     """
     Compute the Hopkins statistic for the input GeoDataFrame.
     The Hopkins statistic is a measure of the spatial clustering of a dataset.
@@ -22,9 +25,6 @@ def hopkins_stat(gdf, k=0.1, prop_k=True):
     if len(gdf) <= 5:
         return np.nan
 
-    # Compute the nearest neighbour distances for the input GeoDataFrame
-    dataset_sum = np.nansum(neighbours(gdf, 1))
-
     if prop_k:
         k = int(len(gdf) * k)
 
@@ -32,13 +32,20 @@ def hopkins_stat(gdf, k=0.1, prop_k=True):
         k = 5
 
     # Randomly select k points from the dataset
-    random_indices = np.random.choice(len(gdf), k, replace=False)
-    random_df = gdf.iloc[random_indices]
+    df_sample = gdf.sample(k)
+    # Compute the distance from each sampled point to its nearest neighbour
+    df_sum = np.nansum(neighbours(df_sample, 1))
 
+    # Generate random points within the region
+    random_points = pointpats.random.poisson(anno, size=len(gdf))
+    random_points = [Point(p) for p in random_points]
+    random_gdf = gpd.GeoDataFrame(geometry=random_points)
+    # Subset k random points
+    random_gdf = random_gdf.sample(k)
     # Compute the distance from each random point to its nearest neighbour
-    random_sum = np.nansum(neighbours(random_df, 1))
+    random_sum = np.nansum(neighbours(random_gdf, 1))
 
     # Compute the ratio of the sum of the distances
-    hopkins_statistic = dataset_sum / (dataset_sum + random_sum)
+    hopkins_statistic = random_sum / (df_sum + random_sum)
 
     return hopkins_statistic
