@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import MultiPolygon, MultiPoint
 import geopandas as gpd
-from SimuSamp.new_funcs.compute.hopkins_stat import hopkins_stat
+
+# from SimuSamp.new_funcs.compute.hopkins_stat import hopkins_stat
 from SimuSamp.new_funcs.compute.n_neighbours import neighbours
 from SimuSamp.new_funcs.compute.core_sample import core_sample
 
@@ -12,7 +13,7 @@ def sample_n_cores(
     region="tumour",
     core_radius=None,
     n_core_list=None,
-    iterations=100,
+    iterations=50,
     microns_per_pixel=0.22715,
 ):
     """
@@ -35,7 +36,9 @@ def sample_n_cores(
     # =========================================================================
 
     # Generate random points within the region ================================
+    print(f"Generating random points in {region}...")
     random_points = spatdat.poisson_distribution(region)
+    print(f"Generated {len(random_points)} random points.")
 
     # Loop through conditions:
 
@@ -55,8 +58,8 @@ def sample_n_cores(
     rand_counts_n_stdev = []
     nearest_neighbour_n_mean = []
     nearest_neighbour_n_stdev = []
-    hopkins_statistic_n_mean = []
-    hopkins_statistic_n_stdev = []
+    # hopkins_statistic_n_mean = []
+    # hopkins_statistic_n_stdev = []
     cores_list = []
     filtered_points_list = []
 
@@ -64,6 +67,10 @@ def sample_n_cores(
         radius_pixels = radius_mm * 1000 / microns_per_pixel
         for n_cores in n_core_list:
             for i in range(iterations):
+
+                print(
+                    f"On radius: {radius_mm}, n_cores: {n_cores}, iteration: {i+1}..."
+                )
 
                 filtered_points = core_sample(
                     random_points, radius_pixels, region, tum, outer_im
@@ -84,7 +91,7 @@ def sample_n_cores(
                 rand_counts = []
                 rand_densities = []
                 nearest_neighbour = []
-                hopkins_statistic = []
+                # hopkins_statistic = []
 
                 for geom in sampled_gdf:
                     core = geom.intersection(ext_partition)
@@ -117,8 +124,8 @@ def sample_n_cores(
                         )
                     nearest_neighbour.append(core_nearest_neighbour)
 
-                    core_hopkins_statistic = hopkins_stat(core, core_cells)
-                    hopkins_statistic.append(core_hopkins_statistic)
+                    # core_hopkins_statistic = hopkins_stat(core, core_cells)
+                    # hopkins_statistic.append(core_hopkins_statistic)
 
                 den_mean.append(np.nanmean(core_densities))
                 den_stdev.append(np.nanstd(core_densities))
@@ -154,16 +161,16 @@ def sample_n_cores(
                     nearest_neighbour_n_mean.append(np.nan)
                     nearest_neighbour_n_stdev.append(np.nan)
 
-                if not all(np.isnan(hopkins_statistic)):
-                    hopkins_statistic_n_mean.append(
-                        np.nanmean(hopkins_statistic)
-                    )
-                    hopkins_statistic_n_stdev.append(
-                        np.nanstd(hopkins_statistic)
-                    )
-                else:
-                    hopkins_statistic_n_mean.append(np.nan)
-                    hopkins_statistic_n_stdev.append(np.nan)
+                # if not all(np.isnan(hopkins_statistic)):
+                #     hopkins_statistic_n_mean.append(
+                #         np.nanmean(hopkins_statistic)
+                #     )
+                #     hopkins_statistic_n_stdev.append(
+                #         np.nanstd(hopkins_statistic)
+                #     )
+                # else:
+                #     hopkins_statistic_n_mean.append(np.nan)
+                #     hopkins_statistic_n_stdev.append(np.nan)
 
                 cores_list.append(MultiPolygon([x for x in sampled_gdf]))
                 filtered_points_list.append(
@@ -188,11 +195,12 @@ def sample_n_cores(
             "random_counts_stdev": rand_counts_n_stdev,
             "nearest_neighbour_mean": nearest_neighbour_n_mean,
             "nearest_neighbour_stdev": nearest_neighbour_n_stdev,
-            "hopkins_statistic_mean": hopkins_statistic_n_mean,
-            "hopkins_statistic_stdev": hopkins_statistic_n_stdev,
             "cores": cores_list,
             "eligible_points": filtered_points_list,
         }
     )
+
+    # "hopkins_statistic_mean": hopkins_statistic_n_mean,
+    # "hopkins_statistic_stdev": hopkins_statistic_n_stdev,
 
     return results_df
