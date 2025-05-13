@@ -2,11 +2,11 @@
 Loads data exported from HALO into Shapely objects
 """
 
-from SimuSamp.new_funcs.load.load_data import load_data
-from SimuSamp.new_funcs.compute.compute_hpfs import compute_hpfs
-from SimuSamp.new_funcs.load.subset_cells import subset
-from SimuSamp.new_funcs.load.subset_annotations import subset_anno
-from SimuSamp.new_funcs.compute.poisson import poisson_cells
+from SimuSamp.functions.load.load_data import load_data
+from SimuSamp.functions.compute.compute_hpfs import compute_hpfs
+from SimuSamp.functions.load.subset_cells import subset
+from SimuSamp.functions.load.subset_annotations import subset_anno
+from SimuSamp.functions.compute.poisson import poisson_cells
 
 
 class SpatDat:

@@ -2,7 +2,7 @@ import numpy as np
 import pointpats
 from shapely.geometry import Point
 import geopandas as gpd
-from SimuSamp.new_funcs.compute.n_neighbours import neighbours
+from SimuSamp.functions.compute.n_neighbours import neighbours
 
 
 def hopkins_stat(anno, gdf, k=0.1, prop_k=True):

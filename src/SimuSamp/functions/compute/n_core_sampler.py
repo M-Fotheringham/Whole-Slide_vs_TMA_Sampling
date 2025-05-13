@@ -4,8 +4,8 @@ from shapely.geometry import MultiPolygon, MultiPoint
 import geopandas as gpd
 
 # from SimuSamp.new_funcs.compute.hopkins_stat import hopkins_stat
-from SimuSamp.new_funcs.compute.n_neighbours import neighbours
-from SimuSamp.new_funcs.compute.core_sample import core_sample
+from SimuSamp.functions.compute.n_neighbours import neighbours
+from SimuSamp.functions.compute.core_sample import core_sample
 
 
 def sample_n_cores(
