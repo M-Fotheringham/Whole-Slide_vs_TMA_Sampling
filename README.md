@@ -6,7 +6,7 @@
 Included are snippets of Python code that were used in concert to process the data and construct some of the figures discussed in "Tissue Microarray vs. Whole-Slide Analysis of CD8 in Non-Small Cell Lung Carcinoma" (Fotheringham et al., *unpublished*).
 
 
-![WhaleFig](documents/WhaleSlide.png)
+![WhaleFig](docs/WhaleSlide.png)
 
   ### 1.1. Functions
   #### 1.1.1. load_sim_data
@@ -53,7 +53,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   
   
   
-![WhaleFig](documents/SimulatedSampling.png)
+![WhaleFig](docs/SimulatedSampling.png)
 *A given sampling iteration using n_cores=10 of circle_radius=0.6 in the invasive margin (IM) and central tumour (CT) visualized with Matplotlib (external code).*
   
   
