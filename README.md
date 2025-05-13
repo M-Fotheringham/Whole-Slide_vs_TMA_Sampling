@@ -53,7 +53,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   
   
   
-![WhaleFig](docs/SimulatedSampling.png)
+![WhaleFig](docs/sampling_example_horizontal_white.png)
 *A given sampling iteration using n_cores=10 of circle_radius=0.6 in the invasive margin (IM) and central tumour (CT) visualized with Matplotlib (external code).*
   
   
