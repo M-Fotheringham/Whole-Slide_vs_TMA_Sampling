@@ -25,30 +25,30 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   - *object_data*: `DataFrame` of the coordinate data for CD8<sup>+</sup> cells;
   - *plot_annotations*: Shapely `Polygons` representing the imported tissue regions.
 
-  Usage:
+    Usage:
 
-      spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
-      
-      # E.g.
-      01_f_object_data = spatdat.object_data
-      01_f_annotation_data = spatdat.annotation_data
-      01_f_sampleid = spatdat.sampleid
-      01_f_parent_filepath = spatdat.parent_filepath
-      01_f_filepath = spatdat.filepath
+        spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+        
+        # E.g.
+        01_f_object_data = spatdat.object_data
+        01_f_annotation_data = spatdat.annotation_data
+        01_f_sampleid = spatdat.sampleid
+        01_f_parent_filepath = spatdat.parent_filepath
+        01_f_filepath = spatdat.filepath
 
-  <br>
+  <br><br>
   
   **subset_cells**:
   Method that retrieves a cell `GeoDataFrame` for cells in a given annotation.
 
   - *annotation*: the `str` name of the annotation of the desired cells.
 
-  Usage
+    Usage
 
-    spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
-    im_cells = spatdat.subset_cells("IM")
+        spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+        im_cells = spatdat.subset_cells("IM")
 
-  <br>
+  <br><br>
   
   **poisson_distribution**:
   Method that creates random set of `n_cells` points within a given annotation using a Poisson point process. Access the points with `SpatDat.poisson_cells[annotation]`.
@@ -56,40 +56,40 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   - *annotation*: the `str` name of the annotation of the desired cells.
   - *n_cells*: the `int` number of cells to be simulated.
 
-  Usage:
+    Usage:
 
-    spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
-    random_points = spatdat.poisson_distribution("IM", 500)
-    # Can alternatively retrieve points from class object:
-    random_IM_pints = spatdat.poisson_cells["IM"]
+        spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+        random_points = spatdat.poisson_distribution("IM", 500)
+        # Can alternatively retrieve points from class object:
+        random_IM_pints = spatdat.poisson_cells["IM"]
 
-  <br>
+  <br><br>
   
   **subset_annotation**:
   Method that retrieves a `Polygon` `GeoDataFrame` for a given annotation.
 
   - *annotation*: the `str` name of the desired annotation.
 
-  Usage:
+    Usage:
+  
+        spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+        im_annotation = spatdat.subset_annotation("IM")
 
-      spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
-      im_annotation = spatdat.subset_annotation("IM")
-
-  <br>
+  <br><br>
   
   **compute_fields**:
   Method that partitions the whole tissue into tiles `width_micron` wide and computes cell densities in IM and CT tiles. Access the tiles with `SpatDat.hpfs`.
 
   - *width_microns*: the `float` width of the square tiles that will partition the tissue.
 
-  Usage:
+    Usage:
 
-      spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
-      spatdat.compute_fields("300.0")
+        spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+        spatdat.compute_fields("300.0")
+  
+        hpfs = spatdat.hpfs
 
-      hpfs = spatdat.hpfs
-
-  <br>
+  <br><br>
   
   #### 1.1.2. n_core_sampler
  The reformatted annotations and cell object data are fed into `n_core_sampler` to simulate random TMA sampling of each tissue region. Coordinates within the range of the tissue bounds are randomly generated until a point is within the tissue `Polygon` and the area of the simulated core generated from extending `core_radius` from that coordinate point matches the tissue-specific criteria:
