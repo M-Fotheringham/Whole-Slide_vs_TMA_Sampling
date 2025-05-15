@@ -97,18 +97,15 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
  IM cores must contain 80% => tumour > 0% and stroma => 10%.
   
 **n_core_sampler**(*SpatDat*, *region*, *core_radius*, *n_core_list*, *iterations*, *microns_per_pixel*):
-  
- *spatdat*: the `SpatDat` `Class` object for a given specimen;
- 
- *region*: the `str` region (either "IM" or "tumour") in which to simulate sampling.
-  
- *core_radius*: the `float` radius of the desired simulated cores.
 
- *n_core_list*: a `list` of the number of cores to be sampled over which the function will iterate.
-
- *iterations*: the `int` number of replicate sampling iterations for each sample number in `n_core_list`.
+  Inputs:
   
-  *microns_per_pixel*: The HALO resolution. Always 0.22715 µm/px.
+  - *spatdat*: the `SpatDat` `Class` object for a given specimen;
+  - *region*: the `str` region (either "IM" or "tumour") in which to simulate sampling.
+  - *core_radius*: the `float` radius of the desired simulated cores.
+  - *n_core_list*: a `list` of the number of cores to be sampled over which the function will iterate.
+  - *iterations*: the `int` number of replicate sampling iterations for each sample number in `n_core_list`.
+  - *microns_per_pixel*: The HALO resolution. Always 0.22715 µm/px.
  
   Returns:
  
