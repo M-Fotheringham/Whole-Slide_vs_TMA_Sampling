@@ -15,7 +15,7 @@ The `SpatDat` `Class` is used to retrieve pre-computed annotation and cell data 
 Tissue annotations (in .annotations format, essentially an xml of listed vertices) and cell object data (in the format of minimum and maximum x, y bounds) were exported from HALO. Annotations were digested and reassembled using Shapely (`Polygon`, `MultiPolygon`). CD8<sup>+</sup> cells were filtered and their centre points were calculated from the average of their bounds.
   
   - *sampleid*: This is the unique tissue block identifier;
-  - *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named *block*.
+  - *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named by the *sampleid*.
   
   **load_data**:
   Default method that imports the CD8 IHC and annotation data:
