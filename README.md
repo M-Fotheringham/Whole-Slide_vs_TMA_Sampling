@@ -36,6 +36,8 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
       01_f_parent_filepath = spatdat.parent_filepath
       01_f_filepath = spatdat.filepath
 
+  
+  
   **subset_cells**:
   Method that retrieves a cell `GeoDataFrame` for cells in a given annotation.
 
@@ -46,6 +48,8 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
     spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
     im_cells = spatdat.subset_cells("IM")
 
+  
+  
   **poisson_distribution**:
   Method that creates random set of `n_cells` points within a given annotation using a Poisson point process. Access the points with `SpatDat.poisson_cells[annotation]`.
 
@@ -59,6 +63,8 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
     # Can alternatively retrieve points from class object:
     random_IM_pints = spatdat.poisson_cells["IM"]
 
+  
+  
   **subset_annotation**:
   Method that retrieves a `Polygon` `GeoDataFrame` for a given annotation.
 
@@ -69,6 +75,8 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
       spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
       im_annotation = spatdat.subset_annotation("IM")
 
+  
+  
   **compute_fields**:
   Method that partitions the whole tissue into tiles `width_micron` wide and computes cell densities in IM and CT tiles. Access the tiles with `SpatDat.hpfs`.
 
@@ -89,8 +97,8 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   Input:
   
  *spatdat*: the `SpatDat` `Class` object for a given specimen;
-  
-  *region*: the `str` region (either "IM" or "tumour") in which to simulate sampling.
+ 
+ *region*: the `str` region (either "IM" or "tumour") in which to simulate sampling.
   
  *core_radius*: the `float` radius of the desired simulated cores.
 
