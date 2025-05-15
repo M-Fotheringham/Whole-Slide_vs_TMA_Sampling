@@ -14,8 +14,6 @@ The data required to perform the present analyses are available in Figshare at [
 The `SpatDat` `Class` is used to retrieve pre-computed annotation and cell data for a given tissue specimen. 
 Tissue annotations (in .annotations format, essentially an xml of listed vertices) and cell object data (in the format of minimum and maximum x, y bounds) were exported from HALO. Annotations were digested and reassembled using Shapely (`Polygon`, `MultiPolygon`). CD8<sup>+</sup> cells were filtered and their centre points were calculated from the average of their bounds.
   
-  Inputs:
-  
   - *sampleid*: This is the unique tissue block identifier;
   - *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named *block*.
   
