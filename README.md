@@ -19,7 +19,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   - *sampleid*: This is the unique tissue block identifier;
   - *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named *block*.
   
-  ##### 1.1.1.1. **load_data**:
+  **load_data**:
   Default method that imports the CD8 IHC and annotation data:
   
   - *object_data*: `DataFrame` of the coordinate data for CD8<sup>+</sup> cells;
@@ -38,7 +38,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  ##### 1.1.1.2. **subset_cells**:
+  **subset_cells**:
   Method that retrieves a cell `GeoDataFrame` for cells in a given annotation.
 
   - *annotation*: the `str` name of the annotation of the desired cells.
@@ -50,7 +50,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  ##### 1.1.1.3. **poisson_distribution**:
+  **poisson_distribution**:
   Method that creates random set of `n_cells` points within a given annotation using a Poisson point process. Access the points with `SpatDat.poisson_cells[annotation]`.
 
   - *annotation*: the `str` name of the annotation of the desired cells.
@@ -65,7 +65,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  ##### 1.1.1.4. **subset_annotation**:
+  **subset_annotation**:
   Method that retrieves a `Polygon` `GeoDataFrame` for a given annotation.
 
   - *annotation*: the `str` name of the desired annotation.
@@ -77,7 +77,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  ##### 1.1.1.5. **compute_fields**:
+  **compute_fields**:
   Method that partitions the whole tissue into tiles `width_micron` wide and computes cell densities in IM and CT tiles. Access the tiles with `SpatDat.hpfs`.
 
   - *width_microns*: the `float` width of the square tiles that will partition the tissue.
