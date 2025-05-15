@@ -159,6 +159,4 @@ Navigate to the SimuSamp folder in the command line and pip install with:
 
 The `Jupyter Notebooks` contained in SimuSamp/Src/SimuSamp/Scripts/ contain intended usages for the `SpatDat` `Class` and associated functions, methods described above.
 
-Users can perform select operations without downloading the CD8 IHC data hosted in Figshare by running SimuSamp/Src/SimuSamp/Scripts/Test.ipynb.
-
 
