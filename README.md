@@ -13,11 +13,13 @@ The data required to perform the present analyses are available in Figshare at [
   #### 1.1.1. SpatDat
 The `SpatDat` `Class` is used to retrieve pre-computed annotation and cell data for a given tissue specimen. 
 Tissue annotations (in .annotations format, essentially an xml of listed vertices) and cell object data (in the format of minimum and maximum x, y bounds) were exported from HALO. Annotations were digested and reassembled using Shapely (`Polygon`, `MultiPolygon`). CD8<sup>+</sup> cells were filtered and their centre points were calculated from the average of their bounds.
+
+  **SpatDat**(*sampleid*, *parent_filepath*)
   
   - *sampleid*: This is the unique tissue block identifier;
   - *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named by the *sampleid*.
   
-  **load_data**:
+  **load_data**(*self*):
   Default method that imports the CD8 IHC and annotation data:
   
   - *object_data*: `DataFrame` of the coordinate data for CD8<sup>+</sup> cells;
@@ -36,7 +38,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  **subset_cells**:
+  **subset_cells**(*self*, *annotation*):
   Method that retrieves a cell `GeoDataFrame` for cells in a given annotation.
 
   - *annotation*: the `str` name of the annotation of the desired cells.
@@ -48,7 +50,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  **poisson_distribution**:
+  **poisson_distribution**(*self*, *annotation*, *n_cells*):
   Method that creates random set of `n_cells` points within a given annotation using a Poisson point process. Access the points with `SpatDat.poisson_cells[annotation]`.
 
   - *annotation*: the `str` name of the annotation of the desired cells.
@@ -63,7 +65,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  **subset_annotation**:
+  **subset_annotation**(*self*, *annotation*):
   Method that retrieves a `Polygon` `GeoDataFrame` for a given annotation.
 
   - *annotation*: the `str` name of the desired annotation.
@@ -75,7 +77,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
 
   <br><br>
   
-  **compute_fields**:
+  **compute_fields**(*self*, *width_microns*):
   Method that partitions the whole tissue into tiles `width_micron` wide and computes cell densities in IM and CT tiles. Access the tiles with `SpatDat.hpfs`.
 
   - *width_microns*: the `float` width of the square tiles that will partition the tissue.
@@ -94,7 +96,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
  Tumour cores must contain at least 50% tumour by area.
  IM cores must contain 80% => tumour > 0% and stroma => 10%.
   
-  Input:
+**n_core_sampler**(*SpatDat*, *region*, *core_radius*, *n_core_list*, *iterations*, *microns_per_pixel*):
   
  *spatdat*: the `SpatDat` `Class` object for a given specimen;
  
