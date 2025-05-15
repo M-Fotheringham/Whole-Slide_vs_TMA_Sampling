@@ -16,38 +16,70 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   
   Inputs:
   
- *sampleid*: This is the unique tissue block identifier;
+  - *sampleid*: This is the unique tissue block identifier;
+  - *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named *block*.
   
- *parent_filepath*: Where the data is stored. The object data and annotations file are in folders for each tissue block, simply named *block*.
-  
-  load_data:
+  **load_data**:
   Default method that imports the CD8 IHC and annotation data:
   
-  *object_data*: `DataFrame` of the coordinate data for CD8<sup>+</sup> cells;
-  
-  *plot_annotations*: Shapely `Polygons` representing the imported tissue regions.
+  - *object_data*: `DataFrame` of the coordinate data for CD8<sup>+</sup> cells;
+  - *plot_annotations*: Shapely `Polygons` representing the imported tissue regions.
 
-  subset_cells:
+  Usage:
+
+      spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+      
+      # E.g.
+      01_f_object_data = spatdat.object_data
+      01_f_annotation_data = spatdat.annotation_data
+      01_f_sampleid = spatdat.sampleid
+      01_f_parent_filepath = spatdat.parent_filepath
+      01_f_filepath = spatdat.filepath
+
+  **subset_cells**:
   Method that retrieves a cell `GeoDataFrame` for cells in a given annotation.
 
-  *annotation*: the `str` name of the annotation of the desired cells.
+  - *annotation*: the `str` name of the annotation of the desired cells.
 
-  poisson_distribution:
+  Usage
+
+    spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+    im_cells = spatdat.subset_cells("IM")
+
+  **poisson_distribution**:
   Method that creates random set of `n_cells` points within a given annotation using a Poisson point process. Access the points with `SpatDat.poisson_cells[annotation]`.
 
-  *annotation*: the `str` name of the annotation of the desired cells.
+  - *annotation*: the `str` name of the annotation of the desired cells.
+  - *n_cells*: the `int` number of cells to be simulated.
 
-  *n_cells*: the `int` number of cells to be simulated.
+  Usage:
 
-  subset_annotation:
+    spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+    random_points = spatdat.poisson_distribution("IM", 500)
+    # Can alternatively retrieve points from class object:
+    random_IM_pints = spatdat.poisson_cells["IM"]
+
+  **subset_annotation**:
   Method that retrieves a `Polygon` `GeoDataFrame` for a given annotation.
 
-  *annotation*: the `str` name of the desired annotation.
+  - *annotation*: the `str` name of the desired annotation.
 
-  compute_fields:
+  Usage:
+
+      spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+      im_annotation = spatdat.subset_annotation("IM")
+
+  **compute_fields**:
   Method that partitions the whole tissue into tiles `width_micron` wide and computes cell densities in IM and CT tiles. Access the tiles with `SpatDat.hpfs`.
 
-  *width_microns*: the `float` width of the square tiles that will partition the tissue.
+  - *width_microns*: the `float` width of the square tiles that will partition the tissue.
+
+  Usage:
+
+      spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
+      spatdat.compute_fields("300.0")
+
+      hpfs = spatdat.hpfs
   
   #### 1.1.2. n_core_sampler
  The reformatted annotations and cell object data are fed into `n_core_sampler` to simulate random TMA sampling of each tissue region. Coordinates within the range of the tissue bounds are randomly generated until a point is within the tissue `Polygon` and the area of the simulated core generated from extending `core_radius` from that coordinate point matches the tissue-specific criteria:
@@ -71,24 +103,25 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   Returns:
  
   *sampling_results*: a `DataFrame` containing:
-    - the mean CD8<sup>+</sup> cell density,
-    - the std of CD8<sup>+</sup> cell densities,
-    - std error of CD8<sup>+</sup> cell densities,
-    - the tissue region,
-    - the sampleid,
-    - the core radius,
-    - the number of cores attempted,
-    - the number of cores actually sampled,
-    - the given iteration,
-    - the mean CD8<sup>+</sup> cell count,
-    - the mean tissue area per sampling iteration,
-    - the mean density of random whole-slide points,
-    - the mean count of random whole-slide points,
-    - the std of count of random whole-slide points,
-    - the mean nearest-neighbour distance,
-    - the std of nearest-neighbour distances,
-    - a `list` of the core `Polygons`,
-    - a `list` of `Points` from which cores could have been selected.
+  
+  - the mean CD8<sup>+</sup> cell density,
+  - the std of CD8<sup>+</sup> cell densities,
+  - std error of CD8<sup>+</sup> cell densities,
+  - the tissue region,
+  - the sampleid,
+  - the core radius,
+  - the number of cores attempted,
+  - the number of cores actually sampled,
+  - the given iteration,
+  - the mean CD8<sup>+</sup> cell count,
+  - the mean tissue area per sampling iteration,
+  - the mean density of random whole-slide points,
+  - the mean count of random whole-slide points,
+  - the std of count of random whole-slide points,
+  - the mean nearest-neighbour distance,
+  - the std of nearest-neighbour distances,
+  - a `list` of the core `Polygons`,
+  - a `list` of `Points` from which cores could have been selected.
   
   
   
