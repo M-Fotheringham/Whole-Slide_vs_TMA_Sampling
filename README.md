@@ -36,7 +36,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
       01_f_parent_filepath = spatdat.parent_filepath
       01_f_filepath = spatdat.filepath
 
-  
+  <br>
   
   **subset_cells**:
   Method that retrieves a cell `GeoDataFrame` for cells in a given annotation.
@@ -48,7 +48,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
     spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
     im_cells = spatdat.subset_cells("IM")
 
-  
+  <br>
   
   **poisson_distribution**:
   Method that creates random set of `n_cells` points within a given annotation using a Poisson point process. Access the points with `SpatDat.poisson_cells[annotation]`.
@@ -63,7 +63,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
     # Can alternatively retrieve points from class object:
     random_IM_pints = spatdat.poisson_cells["IM"]
 
-  
+  <br>
   
   **subset_annotation**:
   Method that retrieves a `Polygon` `GeoDataFrame` for a given annotation.
@@ -75,7 +75,7 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
       spatdat = SpatDat("01_F", "../../../../Simulated WS Sampling/block_data")
       im_annotation = spatdat.subset_annotation("IM")
 
-  
+  <br>
   
   **compute_fields**:
   Method that partitions the whole tissue into tiles `width_micron` wide and computes cell densities in IM and CT tiles. Access the tiles with `SpatDat.hpfs`.
@@ -88,6 +88,8 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
       spatdat.compute_fields("300.0")
 
       hpfs = spatdat.hpfs
+
+  <br>
   
   #### 1.1.2. n_core_sampler
  The reformatted annotations and cell object data are fed into `n_core_sampler` to simulate random TMA sampling of each tissue region. Coordinates within the range of the tissue bounds are randomly generated until a point is within the tissue `Polygon` and the area of the simulated core generated from extending `core_radius` from that coordinate point matches the tissue-specific criteria:
@@ -132,10 +134,10 @@ Tissue annotations (in .annotations format, essentially an xml of listed vertice
   - a `list` of `Points` from which cores could have been selected.
   
   
-  
 ![WhaleFig](docs/sampling_example_horizontal_white.png)
 *A given sampling iteration using `n_core_list=[5]` of `core_radius=0.3`, `core_radius=0.5`, and `core_radius=1.0` in the invasive margin (IM) and central tumour (CT) visualized with Matplotlib.*
 
+<br>
   
 ## 2. Instructions
 ### 2.1. Download Whole-Slide and TMA CD8 IHC Data
