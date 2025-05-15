@@ -17,11 +17,20 @@ readme = "README.md"
 dependencies = [
     "pandas",
     "numpy",
+    "ast",
+    "scipy",
     "matplotlib",
     "seaborn",
     "shapely",
     "geopandas",
     "datetime",
+    "astropy",
+    "alphashape",
+    "pointpats",
+    "itertools",
+    "statsmodels",
+    "sklearn",
+    
 ]
 
 [project.optional-dependencies]
