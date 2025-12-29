@@ -3,9 +3,11 @@ Loads data exported from HALO into Shapely objects
 """
 
 from SimuSamp.functions.load.load_data import load_data
+from SimuSamp.functions.load.load_tma_data import load_tma_data
 from SimuSamp.functions.compute.compute_hpfs import compute_hpfs
 from SimuSamp.functions.load.subset_cells import subset
 from SimuSamp.functions.load.subset_annotations import subset_anno
+from SimuSamp.functions.load.subset_cores import subset_tma_cores
 from SimuSamp.functions.compute.poisson import poisson_cells
 
 
@@ -20,6 +22,10 @@ class SpatDat:
 
         self.object_data, self.annotation_data = load_data(
             self.filepath, self.cell_name
+        )
+        # Still building...
+        self.tma_cores, self.tma_data, self.tma_annotation = load_tma_data(
+            self.sampleid, self.parent_filepath
         )
 
         self.poisson_cells = {}
@@ -53,3 +59,11 @@ class SpatDat:
         )
 
         self.hpfs = hpfs
+
+    def subset_cores(self, core_id=None, region=None):
+        # Work in progress...
+        tma_cells, tma_anno = subset_tma_cores(
+            self.tma_data, self.tma_annotation, core_id, region
+        )
+
+        return tma_cells, tma_anno
