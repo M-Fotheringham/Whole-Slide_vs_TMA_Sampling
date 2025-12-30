@@ -61,10 +61,9 @@ class SpatDat:
 
         self.hpfs = hpfs
 
-    # def subset_cores(self, core_id=None, region=None):
-    #     # Work in progress...
-    #     tma_cells, tma_anno = subset_tma_cores(
-    #         self.tma_data, self.tma_annotation, core_id, region
-    #     )
+    def subset_cores(self, core_id=None, region=None):
+        tma_cells, tma_anno = subset_tma_cores(
+            self.core_map, self.tma_data, self.tma_annotation, core_id, region
+        )
 
-        # return tma_cells, tma_anno
+        return tma_cells, tma_anno
