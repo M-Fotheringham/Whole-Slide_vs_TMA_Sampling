@@ -24,7 +24,7 @@ class SpatDat:
             self.filepath, self.cell_name
         )
         # Still building...
-        self.tma_cores, self.tma_data, self.tma_annotation = load_tma_data(
+        self.core_map, self.tma_data, self.tma_annotation = load_tma_data(
             self.sampleid, self.parent_filepath
         )
 
