@@ -8,7 +8,7 @@ import geopandas as gpd
 def load_tma_data(sampleid, parent_filepath):
     """Load TMA data for a given SampleID."""
 
-    filepath = f"{parent_filepath}/../TMA_data/"
+    filepath = parent_filepath.rsplit("/", 1)[0] + "/TMA_data"
 
     # Get map of core locations and other metadata =======================
     core_map = pd.read_excel(f"{filepath}/Core_Map.xlsx")
@@ -45,7 +45,7 @@ def load_tma_data(sampleid, parent_filepath):
     # Still editing...
     # Get Annotation Data from xml-style files ===========================
     tma_anno = []
-    for idx, label in enumerate(core_map["Annotation File"]):
+    for idx, label in enumerate(core_map["Annotation_File"]):
         with open(f"{filepath}/Annotations/{label}.annotations", "r") as file:
             lines = file.readlines()
 
@@ -107,7 +107,7 @@ def load_tma_data(sampleid, parent_filepath):
         # Net polygons for analysis
         analysis_area = positive_polygons.difference(negative_polygons)
 
-        tma_anno = gpd.GeoDataFrame(
+        anno_df = gpd.GeoDataFrame(
             {"layer": [
                 "positive_regions",
                 "negative_regions",
@@ -119,7 +119,11 @@ def load_tma_data(sampleid, parent_filepath):
                 analysis_area]},
             geometry="geometry")
 
-        tma_anno.loc[:, "Coords"] = core_map.loc[idx, "Coords"][0]
-        # =================================================================
+        anno_df.loc[:, "Coords"] = core_map.loc[idx, "Coords"]
+
+        tma_anno.append(anno_df)
+
+    tma_anno = pd.concat(tma_anno).reset_index(drop=True)
+    # =================================================================
 
     return core_map, tma_data, tma_anno
