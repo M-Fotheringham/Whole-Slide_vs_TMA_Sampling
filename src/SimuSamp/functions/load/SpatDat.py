@@ -12,7 +12,7 @@ from SimuSamp.functions.compute.poisson import poisson_cells
 
 
 class SpatDat:
-    def __init__(self, sampleid, parent_filepath, cell_name="CD8"):
+    def __init__(self, sampleid, parent_filepath, cell_name="CD8", tma=False):
 
         self.sampleid = sampleid
         self.parent_filepath = parent_filepath
@@ -23,10 +23,11 @@ class SpatDat:
         self.object_data, self.annotation_data = load_data(
             self.filepath, self.cell_name
         )
-        # Still building...
-        self.core_map, self.tma_data, self.tma_annotation = load_tma_data(
-            self.sampleid, self.parent_filepath
-        )
+        
+        if tma:
+            self.core_map, self.tma_data, self.tma_annotation = load_tma_data(
+                self.sampleid, self.parent_filepath
+            )
 
         self.poisson_cells = {}
 
@@ -60,10 +61,10 @@ class SpatDat:
 
         self.hpfs = hpfs
 
-    def subset_cores(self, core_id=None, region=None):
-        # Work in progress...
-        tma_cells, tma_anno = subset_tma_cores(
-            self.tma_data, self.tma_annotation, core_id, region
-        )
+    # def subset_cores(self, core_id=None, region=None):
+    #     # Work in progress...
+    #     tma_cells, tma_anno = subset_tma_cores(
+    #         self.tma_data, self.tma_annotation, core_id, region
+    #     )
 
-        return tma_cells, tma_anno
+        # return tma_cells, tma_anno
