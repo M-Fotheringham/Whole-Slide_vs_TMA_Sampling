@@ -36,8 +36,7 @@ def load_tma_data(sampleid, parent_filepath):
 
     tma_data.loc[:, "geometry"] = cell_coords
 
-    tma_data = tma_data.drop(
-        ["XMin", "XMax", "YMin", "YMax"], axis=1)
+    tma_data = tma_data.drop(["XMin", "XMax", "YMin", "YMax"], axis=1)
 
     tma_data = gpd.GeoDataFrame(tma_data, geometry="geometry")
     # ====================================================================
@@ -63,7 +62,7 @@ def load_tma_data(sampleid, parent_filepath):
             elif "<Region Type=" in line:
                 # Ascertain if polygon is positive or negative
                 region_status = line.split('NegativeROA="')[1]
-                region_status = region_status.split('">')[0] == '0'
+                region_status = region_status.split('">')[0] == "0"
                 vertices = []
 
             elif "<V X=" in line:
@@ -80,50 +79,60 @@ def load_tma_data(sampleid, parent_filepath):
                     positive_region.append(region_status)
 
         annos = pd.DataFrame(
-            {"Layer": layers,
+            {
+                "Layer": layers,
                 "Positive Region": positive_region,
                 "Polygon": polygons,
-                "Area": [Polygon(i).area for i in polygons]}
-            )
+                "Area": [Polygon(i).area for i in polygons],
+            }
+        )
 
         annos = annos.sort_values(
             ["Layer", "Positive Region", "Area"],
-            ascending=[False, False, False]).reset_index(drop=True)
+            ascending=[False, False, False],
+        ).reset_index(drop=True)
 
         # Positive polygons for plotting
         positive_polygons = unary_union(
             MultiPolygon(
                 annos[annos["Positive Region"] == 1]["Polygon"].tolist()
-                ).buffer(0)
-                )
+            ).buffer(0)
+        )
 
         # Negative polygons for plotting
         negative_polygons = unary_union(
             MultiPolygon(
                 annos[annos["Positive Region"] == 0]["Polygon"].tolist()
-                ).buffer(0)
-                )
+            ).buffer(0)
+        )
 
         # Net polygons for analysis
         analysis_area = positive_polygons.difference(negative_polygons)
 
         anno_df = gpd.GeoDataFrame(
-            {"layer": [
-                "positive_regions",
-                "negative_regions",
-                "analysis_area",
+            {
+                "layer": [
+                    "positive_regions",
+                    "negative_regions",
+                    "analysis_area",
                 ],
                 "geometry": [
-                positive_polygons,
-                negative_polygons,
-                analysis_area]},
-            geometry="geometry")
+                    positive_polygons,
+                    negative_polygons,
+                    analysis_area,
+                ],
+            },
+            geometry="geometry",
+        )
 
         anno_df.loc[:, "Coords"] = core_map.loc[idx, "Coords"]
 
         tma_anno.append(anno_df)
 
-    tma_anno = pd.concat(tma_anno).reset_index(drop=True)
+    if len(tma_anno) == 0:
+        raise ValueError(f"No annotated cores available for {sampleid}.")
+    else:
+        tma_anno = pd.concat(tma_anno).reset_index(drop=True)
     # =================================================================
 
     return core_map, tma_data, tma_anno
